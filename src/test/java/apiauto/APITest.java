@@ -1,10 +1,12 @@
 package apiauto;
 
 import io.restassured.RestAssured;
+import io.restassured.module.jsv.JsonSchemaValidator;
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.util.HashMap;
 
 
@@ -15,16 +17,40 @@ public class APITest {
         // Define baseURI
         RestAssured.baseURI = "https://reqres.in/";
 
+        int userId = 1;
+
         // Test GET api/users?page=1 with total data 6 per page
         RestAssured
                 .given()
+                    .log().all()
                 .when()
-                    .get("api/users?page=1")
+                    .get("api/users/" + userId)
                 .then()
                     .log().all()
                     .assertThat().statusCode(200)
-                    .assertThat().body("page", Matchers.equalTo(1))
-                    .assertThat().body("data.id", Matchers.hasSize(6));
+                    .assertThat().body("data.id", Matchers.equalTo(userId));
+    }
+
+    @Test
+    public void validateJsonSchemaGetSingleUserTest() {
+        // Define baseURI
+        RestAssured.baseURI = "https://reqres.in";
+
+        int userId = 5;
+
+        // File JSON Schema to compare
+        File file = new File("src/test/resources/jsonSchema/GetSingleUserSchema.json");
+
+        // Test GET api
+        RestAssured
+                .given()
+                    .log().all()
+                .when()
+                    .get("api/users/" + userId)
+                .then()
+                    .log().all()
+                    .assertThat().statusCode(200)
+                    .assertThat().body(JsonSchemaValidator.matchesJsonSchema(file));
     }
 
     @Test
@@ -44,6 +70,7 @@ public class APITest {
         // Test POST with header that accept JSON Format
         RestAssured
                 .given()
+                    .log().all()
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
                     .body(jsonObject.toString())
@@ -106,6 +133,7 @@ public class APITest {
 
         RestAssured
                 .given()
+                    .log().all()
                     .header("Content-Type", "application/json")
                     .body(jsonObject.toString())
                 .when()
@@ -142,6 +170,7 @@ public class APITest {
 
         RestAssured
                 .given()
+                    .log().all()
                     .header("Content-Type", "application/json")
                     .body(jsonObject.toString())
                 .when()
@@ -162,10 +191,11 @@ public class APITest {
 
         RestAssured
                 .given()
+                    .log().all()
                 .when()
                     .delete("api/users" + userIdToDelete)
                 .then()
                     .log().all()
-                    .assertThat().statusCode(204)
+                    .assertThat().statusCode(204);
     }
 }
