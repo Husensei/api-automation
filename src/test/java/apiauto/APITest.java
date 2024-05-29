@@ -151,4 +151,21 @@ public class APITest {
                     .assertThat().statusCode(200)
                     .assertThat().body("first_name", Matchers.equalTo(newName));
     }
+
+    @Test
+    public void deleteUserTest() {
+        // Define baseURI
+        RestAssured.baseURI = "https://reqres.in/";
+
+        // Data to delete
+        int userIdToDelete = 4;
+
+        RestAssured
+                .given()
+                .when()
+                    .delete("api/users" + userIdToDelete)
+                .then()
+                    .log().all()
+                    .assertThat().statusCode(204)
+    }
 }
