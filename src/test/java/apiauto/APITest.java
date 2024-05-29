@@ -59,7 +59,7 @@ public class APITest {
     }
 
     @Test
-    public void updateUserTest() {
+    public void updateUserPutTest() {
         // Define baseURI
         RestAssured.baseURI = "https://reqres.in/";
 
@@ -110,6 +110,42 @@ public class APITest {
                     .body(jsonObject.toString())
                 .when()
                     .put("api/users/" + userId)
+                .then()
+                    .log().all()
+                    .assertThat().statusCode(200)
+                    .assertThat().body("first_name", Matchers.equalTo(newName));
+    }
+
+    @Test
+    public void updateUserPatchTest() {
+        // Define baseURI
+        RestAssured.baseURI = "https://reqres.in/";
+
+        // Data to update
+        int userId = 3;
+        String newName = "updatedUser";
+
+        // Test PATCH userId 3, update first name
+        String fname = RestAssured
+                .given()
+                .when()
+                    .get("api/users/" + userId)
+                    .getBody().jsonPath()
+                    .get("data.first_name");
+
+        System.out.println("name before = " + fname);
+
+        // Create body request with HashMap and convert it to JSON
+        HashMap<String, String> bodyMap = new HashMap<>();
+        bodyMap.put("first_name", newName);
+        JSONObject jsonObject = new JSONObject(bodyMap);
+
+        RestAssured
+                .given()
+                    .header("Content-Type", "application/json")
+                    .body(jsonObject.toString())
+                .when()
+                    .patch("api/users/" + userId)
                 .then()
                     .log().all()
                     .assertThat().statusCode(200)
