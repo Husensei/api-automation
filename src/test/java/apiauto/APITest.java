@@ -5,6 +5,9 @@ import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
+
+
 public class APITest {
 
     @Test
@@ -53,5 +56,63 @@ public class APITest {
                     .assertThat().body("job", Matchers.equalTo(job))
                     .assertThat().body("$", Matchers.hasKey("id"))
                     .assertThat().body("$", Matchers.hasKey("createdAt"));
+    }
+
+    @Test
+    public void updateUserTest() {
+        // Define baseURI
+        RestAssured.baseURI = "https://reqres.in/";
+
+        // Data to update
+        int userId = 2;
+        String newName = "updatedUser";
+
+        // Test PUT userId 2, update first name
+        String fname = RestAssured
+                .given()
+                .when()
+                    .get("api/users/" + userId)
+                    .getBody().jsonPath()
+                    .get("data.first_name");
+        String lname = RestAssured
+                .given()
+                .when()
+                    .get("api/users/" + userId)
+                    .getBody().jsonPath()
+                    .get("data.last_name");
+        String avatar = RestAssured
+                .given()
+                .when()
+                    .get("api/users/" + userId)
+                    .getBody().jsonPath()
+                    .get("data.avatar");
+        String email = RestAssured
+                .given()
+                .when()
+                    .get("api/users/" + userId)
+                    .getBody().jsonPath()
+                    .get("data.email");
+
+        System.out.println("name before = " + fname);
+
+        // Create body request with HashMap and convert it to JSON
+        HashMap<String, Object> bodyMap = new HashMap<>();
+        bodyMap.put("id", userId);
+        bodyMap.put("email", email);
+        bodyMap.put("first_name", newName);
+        bodyMap.put("last_name", lname);
+        bodyMap.put("avatar", avatar);
+        JSONObject jsonObject = new JSONObject(bodyMap);
+
+        RestAssured
+                .given()
+                    .header("Content-Type", "application/json")
+                    .body(jsonObject.toString())
+                .when()
+                    .put("api/users/" + userId)
+                .then()
+                    .log().all()
+                    .assertThat().statusCode(200)
+                    .assertThat().body("first_name", Matchers.equalTo(newName));
     }
 }
