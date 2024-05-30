@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id("io.qameta.allure") version "2.11.0"
 }
 
 group = 'com.husensei'
@@ -17,5 +18,7 @@ dependencies {
 }
 
 test {
-    useTestNG()
+    useTestNG() {
+        suites "src/test/resources/testng.xml"
+    }
 }
